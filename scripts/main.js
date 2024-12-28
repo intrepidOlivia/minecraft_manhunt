@@ -38,8 +38,7 @@ world.afterEvents.entityDie.subscribe(deathEvent => {
     if (deathEvent.deadEntity instanceof Player) {
         // If the target dies
         if (deathEvent.deadEntity == target) {
-            targetLoseState(target);
-            target = null;
+            // targetLoseState(target);
             if (deathEvent.damageSource.damagingEntity instanceof Player) {
                 assassinWinState(deathEvent.damageSource.damagingEntity);
             }
@@ -92,7 +91,6 @@ function initAssassin(player) {
 }
 
 function setAssassinProperties(player) {
-    player.addEffect("minecraft:slowness", 600, { showParticles: false });
     system.runTimeout(() => setAssassinProperties(player), 600);    
 }
 
@@ -113,6 +111,11 @@ function targetWinCheck() {
 }
 
 function targetWinState() {
+    // Clear the inventory
+    const inventory = player.getComponent("minecraft:inventory");
+    if (inventory && inventory.container) {
+        inventory.container.clearAll();
+    }
     target.onScreenDisplay.setTitle("You win!", { 
         stayDuration: titleDuration,
         fadeInDuration: 2,
