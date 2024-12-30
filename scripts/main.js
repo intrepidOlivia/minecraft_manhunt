@@ -89,6 +89,7 @@ world.afterEvents.playerDimensionChange.subscribe(dimensionChangeEvent => {
 function initTarget(player) {
     target = player;
     const subtitleString = `${target.name}, \nYOU are the assassination target. \n${getWinStateString()} \nbefore you're murdered!`;
+    world.setDefaultSpawnLocation(target.location);
     target.sendMessage(subtitleString);
     target.onScreenDisplay.setTitle("Minecraft Manhunt", { 
         stayDuration: titleDuration,
