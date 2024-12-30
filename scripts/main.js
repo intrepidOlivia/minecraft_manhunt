@@ -74,28 +74,42 @@ world.beforeEvents.itemUse.subscribe(data => {
     }
 });
 
+world.afterEvents.playerDimensionChange.subscribe(dimensionChangeEvent => {
+    if (dimensionChangeEvent.player !== target) {
+        return;
+    }
+
+    if (dimensionChangeEvent.toDimension.id === 'minecraft:nether') {
+        targetWinState();
+        assassinsLoseState();
+    } else {
+    }
+});
+
 function initTarget(player) {
     target = player;
+    const subtitleString = `${target.name}, \nYOU are the assassination target. \n${getWinStateString()} \nbefore you're murdered!`;
+    target.sendMessage(subtitleString);
     target.onScreenDisplay.setTitle("Minecraft Manhunt", { 
         stayDuration: titleDuration,
         fadeInDuration: 2,
         fadeOutDuration: 4,
-        subtitle: `${target.name}, \nYOU are the assassination target. \n${getWinStateString()} \nbefore you're murdered!`
+        subtitle: subtitleString,
     });
-    target.sendMessage(`${target.name}, YOU are the assassination target. ${getWinStateString()} before you're murdered!`);
     setTargetProperties();
-    targetWinCheck();
 }
 
 function initAssassin(player) {
     system.runTimeout(() => {
         player.runCommand(`give ${player.name} minecraft:compass 1`);
     }, 2); // Run after two ticks to avoid the initial inventory clearing in main()
+    const subtitleString = `${player.name}, you are an assassin! \nUSE your compass \nto find the current location \nof your target.`;
+    player.sendMessage(subtitleString);
     player.onScreenDisplay.setTitle("Minecraft Manhunt", {
         stayDuration: titleDuration,
         fadeInDuration: 2,
         fadeOutDuration: 4,
-        subtitle: `${player.name}, you are an assassin! \nUSE your compass \nto find the current location \nof your target.`
+        subtitle: subtitleString,
     });
     player.sendMessage(`${player.name}, you are an assassin! Use your compass to find the current location of your target.`);
     setAssassinProperties(player);
@@ -111,36 +125,27 @@ function setTargetProperties() {
     system.runTimeout(setTargetProperties, 600);
 }
 
-function targetWinCheck() {
-    if (target.level >= winLevel) {
-        targetWinState();
-        assassinsLoseState();
-        return;
-    } else {
-        system.runTimeout(targetWinCheck, 100);
-    }
-}
-
 function targetWinState() {
-    // Clear the inventory
-    const inventory = target.getComponent("minecraft:inventory");
-    if (inventory && inventory.container) {
-        inventory.container.clearAll();
-    }
-    target.onScreenDisplay.setTitle("You win!", { 
-        stayDuration: titleDuration,
-        fadeInDuration: 2,
-        fadeOutDuration: 4,
-        subtitle: `You ${getWinStateString('past')} \nand beat out the assassins. \nWell done!`
-    });
+    system.runTimeout(() => {
+        const subtitleString = `You ${getWinStateString('past')} \nand beat out the assassins. \nWell done!`;
+        target.sendMessage('You win!' + subtitleString);
+        target.onScreenDisplay.setTitle("You win!", { 
+            stayDuration: titleDuration,
+            fadeInDuration: 2,
+            fadeOutDuration: 4,
+            subtitle: subtitleString,
+        });
+    }, 40);
 }
 
 function targetLoseState(player) {
+    const subtitleString = 'Better luck next time.';
+    player.sendMessage('You lose! ' + subtitleString);
     player.onScreenDisplay.setTitle("You lose!", {
         stayDuration: titleDuration,
         fadeInDuration: 2,
         fadeOutDuration: 4,
-        subtitle: `Better luck next time.`
+        subtitle: subtitleString
     });
     system.runTimeout(() => {
         initAssassin(player);
@@ -148,11 +153,13 @@ function targetLoseState(player) {
 }
 
 function assassinWinState(player) {
+    const subtitleString = 'You are a highly effective killer.';
+    player.sendMessage('You win! ' + subtitleString);
     player.onScreenDisplay.setTitle("You Win!", {
         stayDuration: titleDuration,
         fadeInDuration: 2,
         fadeOutDuration: 4,
-        subtitle: `You are a highly effective killer.`
+        subtitle: subtitleString,
     });
     system.runTimeout(() => {
         initTarget(player);
@@ -160,26 +167,21 @@ function assassinWinState(player) {
 }
 
 function assassinsLoseState() {
+    const subtitleString = `You failed to assassinate the target\nbefore they ${getWinStateString('past')}.\nBetter luck next time.`;
     world.getPlayers().forEach(player => {
         if (player !== target) {
+            player.sendMessage('You lose! ' + subtitleString);
             player.onScreenDisplay.setTitle("You lose!", {
                 stayDuration: titleDuration,
                 fadeInDuration: 2,
                 fadeOutDuration: 4,
-                subtitle: `You failed to assassinate the target\nbefore they ${getWinStateString('past')}.\nBetter luck next time.`
+                subtitle: subtitleString
             });
         }
     });
 }
 
 function getWinStateString(tense) {
-    switch (tense) {
-        case 'past':
-            return `reached level ${winLevel}`;
-        default:
-            return `get to level ${winLevel}`;
-    }
-
     switch (tense) {
         case 'past':
             return 'escaped to the Nether';
