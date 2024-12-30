@@ -80,9 +80,9 @@ function initTarget(player) {
         stayDuration: titleDuration,
         fadeInDuration: 2,
         fadeOutDuration: 4,
-        subtitle: `${target.name}, \nYOU are the assassination target. \nGet to level ${winLevel} \nbefore you're murdered!`
+        subtitle: `${target.name}, \nYOU are the assassination target. \n${getWinStateString()} \nbefore you're murdered!`
     });
-    target.sendMessage(`${target.name}, YOU are the assassination target. Get to level ${winLevel} before you're murdered!`);
+    target.sendMessage(`${target.name}, YOU are the assassination target. ${getWinStateString()} before you're murdered!`);
     setTargetProperties();
     targetWinCheck();
 }
@@ -123,7 +123,7 @@ function targetWinCheck() {
 
 function targetWinState() {
     // Clear the inventory
-    const inventory = player.getComponent("minecraft:inventory");
+    const inventory = target.getComponent("minecraft:inventory");
     if (inventory && inventory.container) {
         inventory.container.clearAll();
     }
@@ -131,7 +131,7 @@ function targetWinState() {
         stayDuration: titleDuration,
         fadeInDuration: 2,
         fadeOutDuration: 4,
-        subtitle: `You reached level ${winLevel} \nand beat out the assassins. \nWell done!`
+        subtitle: `You ${getWinStateString('past')} \nand beat out the assassins. \nWell done!`
     });
 }
 
@@ -166,10 +166,26 @@ function assassinsLoseState() {
                 stayDuration: titleDuration,
                 fadeInDuration: 2,
                 fadeOutDuration: 4,
-                subtitle: `You failed to assassinate the target\nbefore they reached level ${winLevel}.\nBetter luck next time.`
+                subtitle: `You failed to assassinate the target\nbefore they ${getWinStateString('past')}.\nBetter luck next time.`
             });
         }
     });
+}
+
+function getWinStateString(tense) {
+    switch (tense) {
+        case 'past':
+            return `reached level ${winLevel}`;
+        default:
+            return `get to level ${winLevel}`;
+    }
+
+    switch (tense) {
+        case 'past':
+            return 'escaped to the Nether';
+        default:
+            return 'escape to the Nether';
+    }
 }
 
 function runWorldCommand(command) {
