@@ -51,13 +51,23 @@ world.beforeEvents.itemUse.subscribe(data => {
     const player = data.source
     if (!(player instanceof Player)) return;
     if (data.itemStack.typeId === 'minecraft:compass') {
-        console.log(`${player.name} used Compass...`);
-        // Set compass to location of target
         if (target != null) {
             player.sendMessage(`Seeking target ${target.name}...`);
-            const location = target.location;
+            target.sendMessage('Someone is seeking you...');
+            const targetLocation = target.location;
+            const playerLocation = player.location;
+            const newPlayerSpawn = {
+                x: playerLocation.x,
+                y: playerLocation.y,
+                z: playerLocation.z,
+                dimension: player.dimension,
+            };
             system.run(() => {
-                world.setDefaultSpawnLocation(location);
+                // Set compass to location of target
+                world.setDefaultSpawnLocation(targetLocation);
+                
+                // Set new spawn point for assassin player
+                player.setSpawnPoint(newPlayerSpawn);
             });
         }
     }
