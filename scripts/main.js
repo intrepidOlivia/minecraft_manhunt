@@ -154,17 +154,9 @@ function targetLoseState(player) {
 }
 
 function assassinWinState(player) {
-    const subtitleString = 'You are a highly effective killer.';
-    player.sendMessage('You win! ' + subtitleString);
-    player.onScreenDisplay.setTitle("You Win!", {
-        stayDuration: titleDuration,
-        fadeInDuration: 2,
-        fadeOutDuration: 4,
-        subtitle: subtitleString,
-    });
-    system.runTimeout(() => {
+    system.run(() => {
         initTarget(player);
-    }, titleDuration);
+    });
 }
 
 function assassinsLoseState() {
