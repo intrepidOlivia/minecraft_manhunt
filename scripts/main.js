@@ -29,7 +29,9 @@ world.afterEvents.playerSpawn.subscribe(spawnData => {
         if (target == null) {
             initTarget(player);
         } else {
-            initAssassin(player);
+            if (target !== player) {
+                initAssassin(player);
+            }
         }
     }, 2);
 });
@@ -38,7 +40,6 @@ world.afterEvents.entityDie.subscribe(deathEvent => {
     if (deathEvent.deadEntity instanceof Player) {
         // If the target dies
         if (deathEvent.deadEntity == target) {
-            // targetLoseState(target);
             if (deathEvent.damageSource.damagingEntity instanceof Player) {
                 assassinWinState(deathEvent.damageSource.damagingEntity);
             }
@@ -65,7 +66,7 @@ world.beforeEvents.itemUse.subscribe(data => {
             system.run(() => {
                 // Set compass to location of target
                 world.setDefaultSpawnLocation(targetLocation);
-                
+
                 // Set new spawn point for assassin player
                 player.setSpawnPoint(newPlayerSpawn);
             });
